@@ -89,9 +89,10 @@ In this lab, we will be completing the following configurations:
 ### Open web01 VM (rocky web server)
 - In proxmox go to hardware tab and select DMZ network adapter
 - set IP
-  - sudo nmcli connection modify "adapter" ipv4.addresses "IP/MASK"
-  - sudo nmcli connection modify "adapter" ipv4.gateway "gatewat"
-  - sudo nmcli connection modify "adapter" ipv4.dns "DNS server"
+  - sudo nmcli connection modify "adapter" ipv4.method manual
+  - sudo nmcli connection modify "adapter" ipv4.addresses "172.16.50.3/29"
+  - sudo nmcli connection modify "adapter" ipv4.gateway "172.16.50.2"
+  - sudo nmcli connection modify "adapter" ipv4.dns "172.16.50.2"
   - sudo nmcli connection down "adapter"
   - sudo nmcli connection up "adapter"
   - test by pinging DMZ interface (on fw01)
@@ -120,4 +121,75 @@ In this lab, we will be completing the following configurations:
 - Test by pinging hostname from web01
 
 ## Configuring log01
-- 
+### Open log01 VM
+- Configure log01 with an IP address ending in .5.
+- Add log01 to DMZ network (change network adapter in hardware tab)
+- set IP
+  - sudo nmcli connection modify "adapter" ipv4.method manual
+  - sudo nmcli connection modify "adapter" ipv4.addresses "IP/MASK"
+  - sudo nmcli connection modify "adapter" ipv4.gateway "gateway"
+  - sudo nmcli connection modify "adapter" ipv4.dns "DNS server"
+  - sudo nmcli connection down "adapter"
+  - sudo nmcli connection up "adapter"
+- Test by pinging google.com
+
+## Configuring httpd on web01
+- See if it's already installed
+  - sudo systemctl status httpd
+  - If it's not
+    - sudo dnf -y install httpd
+  - start it
+    - sudo systemctl start httpd
+    - verify with sudo systemctl status httpd
+
+## Configuring firewall on web01
+- sudo firewall-cmd --permanent --add-port=80/tcp
+- sudo firewall-cmd --permanent --add-port=443/tcp
+- sudo firewall-cmd --reload
+
+## Testing httpd on web01 from rw01
+### We need to tell rw01 that any address in our DMZ should route via our firewall’s (VyOS) WAN interface.
+### Open rw01 VM
+- Open network connections
+- select wired connection 1
+  - IPv4 Settings
+  - Select routes box
+  - Select add
+  - for address add the DMZ network
+  - netmask in our case is 255.255.255.248 or /29
+  - gateway is our WAN interface
+- restart network using sudo systemctl restart NetworkManager
+- Test access to our web01 web server by typing its ip into browser on rw01 VM
+
+## Configuring rsyslog services on log01
+- Check that rsyslog is install using sudo systemctl status rsyslog
+- Allow port 514 TCP/UDP through firewall
+  - sudo firewall-cmd --permanent --add-port=514/tcp
+  - sudo firewall-cmd --permanent --add-port=514/udp
+  - sudo firewall-cmd --reload
+- We also edit the /etc/rsyslog.conf file to allow TCP and UDP modules to be loaded (look for module and input on first line and uncomment)
+  - restart rsyslog service > sudo systemctl restart rsyslog
+- verify rsyslog is listening on the ports
+  - can do this with netstat -tupan : grep 514
+    - note: may need to install net-tools to use netstat command
+
+## Configuring rsyslog client on web01
+- verify rsyslog is installed and running on web01
+  - sudo systemctl status rsyslog
+- We create file /etc/rsyslog.d/sec350.conf
+- Restart rsyslog
+- In this file we add the line "user.notice @<log01-IP>"
+
+## Test rsyslog messaging from web01 to log01
+- On our log01 VM we use sudo tail -f the /var/log/messages
+- On web01 we use the local logger utility to send a syslog message
+  - sudo systemctl restart rsyslog
+  - logger -t test TESTFROMWEB01TOLOG01
+- On log01 you should see this message
+
+## rw01->SSH->web01->SSH->log01
+### From rw01, use a SSH session to login to web01, from that SSH session login to log01.
+- In terminal on rw01 type "ssh@web01-IP"
+- Once logged into web01 from command line type "ssh@log01-IP"
+
+# This is the end of this setup writeup
