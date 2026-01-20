@@ -1,11 +1,11 @@
 # Lab 01 
-- Overview and checklist
-In this lab, you will be completing the following configurations.  This is just to give you a picture of where you are headed with the lab - and following the steps below the list will get you there!
+## Overview and checklist
+In this lab, we will be completing the following configurations:
 
-Rw01: This is the “road warrior” linux laptop.  A computer that sits outside your organization's network
-Add sudo user
-Configure IP configuration (ip, mask, gateway etc.)
-Configure IP route to direct certain traffic to the organization’s DMZ
+- Rw01: This is the “road warrior” linux laptop. A computer that sits outside our organization's network
+  - Add sudo user
+  - Configure IP configuration (ip, mask, gateway etc.)
+  - Configure IP route to direct certain traffic to the organization’s DMZ
 
 Fw01: This is a vyos router/firewall that connects the SEC-350 (ISP), DMZ, and LAN networks
 Add and set adapters in proxmox
