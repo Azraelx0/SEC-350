@@ -191,5 +191,5 @@ In this lab, we will be completing the following configurations:
 ### From rw01, use a SSH session to login to web01, from that SSH session login to log01.
 - In terminal on rw01 type "ssh@web01-IP"
 - Once logged into web01 from command line type "ssh@log01-IP"
-
+# Network diagram
 # This is the end of this setup writeup
