@@ -192,4 +192,5 @@ In this lab, we will be completing the following configurations:
 - In terminal on rw01 type "ssh@web01-IP"
 - Once logged into web01 from command line type "ssh@log01-IP"
 # Network diagram
+- will be added soon
 # This is the end of this setup writeup
