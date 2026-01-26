@@ -59,3 +59,32 @@ Next we want to enable DNS
 On mgmt machine we can test by pinging a hostname like google.com
 We should also be able to navigate to websites from browser
 
+## Log Organization
+Remote logs should be segregated and ideally stored on reliable and redundant storage in a manner that supports dealing with discrete event types. We are going to store logs in a directory hierarchy in order to provide this organization.
+
+- On log01
+  - go into /etc/rsyslog.conf
+  - comment out UDP and TCP syslog reception modules/input lines
+- Create custom rsyslog drop-in file
+  - cd /etc/rsyslog.d
+  - sudo curl https://raw.githubusercontent.com/gmcyber/sec350-share/main/03-sec350.conf
+  - cat 03-sec350.conf
+### This configuration file (03-sec350.conf) will dynamically create and name files based upon hostname, date and process name. Input over udp 514 is associated with the RemoteDevice ruleset, which in turn uses the dynamic template configuration called “DynFile”.
+
+To test we can go back to web01 and run
+ - logger -t I am testing rsyslog from web01 
+Then back on log01
+  - sudo ls -lR --color /var/log/remote-syslog/
+  - sudo cat /var/log/remote-syslog/web01-azrael/2026.01.26.I.log
+
+## Web01: Logging Authorization Events
+Modify the rsyslog client configuration on web01 so that authentication events are forwarded to our log server. file entry goes to web01 not log01
+- sudo vi /etc/rsyslog.d/sec350.conf
+- should have lines: user.notice @172.16.50.5 and authpriv.* @172.16.50.5
+We can test this by sshing from rw01 into web01 and purposely enter wrong password
+Then we can go back to log01 and read the log file
+- must swap to root user for this brief time, sudo su
+- cd /var/log/remote-syslog/web01-azrael/
+- ls
+- cat /2026.01.26.sshd.log
+- exit root user
