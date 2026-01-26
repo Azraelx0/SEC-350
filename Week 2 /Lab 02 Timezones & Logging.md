@@ -12,5 +12,5 @@ To fix we will simply comment out a single line on our RW01 machine
   - We can now test this change by using logger -t test timingiseverything2
   - Then read the log with -> sudo cat /var/log/syslog | grep timingiseverything2
 Below screenshot is the before and after
-<img width="768" height="134" alt="image" src="https://github.com/user-attachments/assets/df2b926d-99ba-4795-9080-a95006c32723" />
-##
+![]("C:\Users\Nordi\Pictures\Screenshots\2026-01-26_15-31-21.png")
+
