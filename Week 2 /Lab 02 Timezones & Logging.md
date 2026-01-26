@@ -12,6 +12,6 @@ To fix we will simply comment out a single line on our RW01 machine
   - Restart rsyslog service
 We can now test this change by using logger -t test timingiseverything2
 Then read the log with -> sudo cat /var/log/syslog | grep timingiseverything
-See below screenshot for difference
+- See below screenshot for difference
 <img width="751" height="68" alt="image" src="https://github.com/user-attachments/assets/3812c134-ee86-4704-91cf-387a0c08cef7" />
 
