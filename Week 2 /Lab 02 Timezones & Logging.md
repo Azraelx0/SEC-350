@@ -98,10 +98,10 @@ To do this we use the command:
 
 2. We will change our vyos user's default password
 To change vyos password:
-- set system login user "user" authentication plaintext-password "password here"
-- DONT use $ sign to avoid errors
+  - set system login user "user" authentication plaintext-password "password here"
+  - DONT use $ sign to avoid errors
 If you would like to set an encrypted password can use this command:
-- set system login user vyos authentication encrypted-password <hash>
+  - set system login user vyos authentication encrypted-password <hash>
 
 3. We are going to turn on ssh and secure that ssh with rsa key based authentication
 First we need to enable the ssh service:
