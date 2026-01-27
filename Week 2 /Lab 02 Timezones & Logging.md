@@ -99,7 +99,7 @@ To do this we use the command:
 ### We will change our vyos user's default password
 To change vyos password:
   - set system login user "user" authentication plaintext-password "password here"
-  - DONT use '$' sign to avoid errors
+  - DONT use $ sign to avoid errors
 If you would like to set an encrypted password can use this command:
   - set system login user vyos authentication encrypted-password <hash>
 
