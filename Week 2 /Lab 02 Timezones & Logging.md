@@ -90,21 +90,20 @@ Then we can go back to log01 and read the log file
 - exit root user
 
 ## fw01: Logging Authorization Events
-We are going to do some critical things in this section:
-
-### We are going to adjust the VyOS configuration to send authentication messages from fw01 to log01
+We are going to do some critical things in this section
+1. We are going to adjust the VyOS configuration to send authentication messages from fw01 to log01
 To do this we use the command:
 - set system syslog remote 172.16.50.5 facility authpriv level info
 
-### We will change our vyos user's default password
-To change vyos password:
+2. We will change our vyos user's default password
+To change vyos password
   - set system login user "user" authentication plaintext-password "password here"
   - DONT use $ sign to avoid errors
 If you would like to set an encrypted password can use this command:
   - set system login user vyos authentication encrypted-password <hash>
 
-### We are going to turn on ssh and secure that ssh with rsa key based authentication
-First we need to enable the ssh service:
+3. We are going to turn on ssh and secure that ssh with rsa key based authentication
+First we need to enable the ssh service
   - set service ssh port 22
 Then we need to generate a public key for our user
   - ssh-keygen -t rsa
