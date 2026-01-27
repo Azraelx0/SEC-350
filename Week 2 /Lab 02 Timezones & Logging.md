@@ -1,6 +1,7 @@
 # Lab 02 Timezones & Logging
 ### Essentially, this lab aims to make the times and logging consistent across our environment so we can create accurate timelines of events
 ### Note some of the formatting in this walkthrough gets weird with sentences merging onto above lines. Will try to fix when I get the time, in the meantime just read carefully
+### Mainly in sections fw01: Logging Authorization Events and Configuring RW01
 
 ## Configuring RW01
 First lets look at the current output of syslog
