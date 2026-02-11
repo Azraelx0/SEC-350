@@ -1,7 +1,9 @@
 # This file contains the configs on both fw01 and fw-mgmt vyos firewalls/routers
 ## fw01:
 set firewall ipv4 name DMZ-to-LAN default-action 'drop'
+
 set firewall ipv4 name DMZ-to-LAN default-log
+
 set firewall ipv4 name DMZ-to-LAN rule 1 action 'accept'
 set firewall ipv4 name DMZ-to-LAN rule 1 state 'established'
 set firewall ipv4 name DMZ-to-LAN rule 10 action 'accept'
