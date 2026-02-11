@@ -81,26 +81,75 @@
     - set firewall ipv4 name WAN-to-LAN rule 1 state established
 
 - Step 10: Configure LAN to DMZ Firewall
-# I am here
+  - create firewall rules on LAN-TO-DMZ that allows:
+    - 80/tcp from LAN to web01.
+  - set firewall ipv4 name LAN-to-DMZ rule 10 action accept
+  - set firewall ipv4 name LAN-to-DMZ rule 10 protocol tcp
+  - set firewall ipv4 name LAN-to-DMZ rule 10 destination address 172.16.50.3
+  - set firewall ipv4 name LAN-to-DMZ rule 10 destination port 80
+    - 22/tcp from mgmt01 to the DMZ
+  - set firewall ipv4 name LAN-to-DMZ rule 20 action accept
+  - set firewall ipv4 name LAN-to-DMZ rule 20 protocol tcp
+  - set firewall ipv4 name LAN-to-DMZ rule 20 source address 172.16.200.11
+  - set firewall ipv4 name LAN-to-DMZ rule 20 destination address 172.16.50.0/29
+  - set firewall ipv4 name LAN-to-DMZ rule 20 destination port 22
+
 - Step 11: DMZ to LAN Firewall
+  - allow DMZ traffic back through
+    - set firewall ipv4 name DMZ-to-LAN rule 1 action accept
+    - set firewall ipv4 name DMZ-to-LAN rule 1 state established
+
+
 
 ## Task 3: Configuring fw-mgmt
+- Step 1: Create LAN and MGMT zones and assign interfaces
+  - set firewall zone LAN
+  - set firewall zone MGMT
+  - set firewall zone LAN member interface eth0
+  - set firewall zone MGMT member interface eth1
+  - commit -> save
 
-Create LAN and MGMT zones on fw-mgmt
-Create both zones and assign the correct interfaces and firewalls.
-LAN-to-MGMT
-Create a LAN-to-MGMT firewall that:
-Allows 1514,1515/tcp from LAN to wazuh
-Allows 443/tcp from mgmt01 on LAN to wazuh
-Allows 22/tcp from mgmt01 on LAN to wazuh
-Allows established traffic back through the related firewall
+- Step 2: Create LAN-to-MGMT firewall
+- set firewall ipv4 name LAN-to-MGMT default-action drop
+- set firewall ipv4 name LAN-to-MGMT default-log
 
-MGMT-to-LAN
-Create a MGMT-TO-LAN firewall that:
-Allows MGMT to initiate any connection to the LAN
-Allows MGMT to initiate any connection to the DMZ
-Allows established traffic back again
-If you do this right, you should be able to connect from mgmt02 to the DMZ like so.
-wget to web01
-ping to mgmt01
-ping outside will fail because you didn't explicitly allow MGMT to go anywhere but LAN and DMZ.
+  - Rule 10: Allow Wazuh agent communications (1514-1515/tcp) from LAN to wazuh:
+    - set firewall ipv4 name LAN-to-MGMT rule 10 action accept
+    - set firewall ipv4 name LAN-to-MGMT rule 10 protocol tcp
+    - set firewall ipv4 name LAN-to-MGMT rule 10 destination address 172.16.200.10
+    - set firewall ipv4 name LAN-to-MGMT rule 10 destination port 1514-1515
+
+  - Rule 20: Allow HTTPS (443/tcp) from mgmt01 to wazuh:
+    - set firewall ipv4 name LAN-to-MGMT rule 20 action accept
+    - set firewall ipv4 name LAN-to-MGMT rule 20 protocol tcp
+    - set firewall ipv4 name LAN-to-MGMT rule 20 source address 172.16.150.10
+    - set firewall ipv4 name LAN-to-MGMT rule 20 destination address 172.16.200.10
+    - set firewall ipv4 name LAN-to-MGMT rule 20 destination port 443
+
+  - Rule 30: Allow SSH (22/tcp) from mgmt01 to wazuh:
+    - set firewall ipv4 name LAN-to-MGMT rule 30 action accept
+    - set firewall ipv4 name LAN-to-MGMT rule 30 protocol tcp
+    - set firewall ipv4 name LAN-to-MGMT rule 30 source address 172.16.150.10
+    - set firewall ipv4 name LAN-to-MGMT rule 30 destination address 172.16.200.10
+    - set firewall ipv4 name LAN-to-MGMT rule 30 destination port 22
+
+- Step 3: Create MGMT-to-LAN firewall
+- set firewall ipv4 name MGMT-to-LAN default-action drop
+- set firewall ipv4 name MGMT-to-LAN default-log
+
+  - Rule 10: Allow MGMT to initiate any connection to LAN (172.16.150.0/24):
+    - set firewall ipv4 name MGMT-to-LAN rule 10 action accept
+    - set firewall ipv4 name MGMT-to-LAN rule 10 destination address 172.16.150.0/24
+
+  - Rule 20: Allow MGMT to initiate any connection to DMZ (172.16.50.0/29):
+    - set firewall ipv4 name MGMT-to-LAN rule 20 action accept
+    - set firewall ipv4 name MGMT-to-LAN rule 20 destination address 172.16.50.0/29
+
+- Step 4: Allow established traffic back through
+  - set firewall ipv4 name LAN-to-MGMT rule 1 action accept
+  - set firewall ipv4 name LAN-to-MGMT rule 1 state established
+
+- Step 5: Assign firewalls to zones
+  - set firewall zone MGMT from LAN firewall name LAN-to-MGMT
+  - set firewall zone LAN from MGMT firewall name MGMT-to-LAN
+  - commit -> save
