@@ -1,15 +1,18 @@
 ## In this lab, we are going to augment web01 by adding a web application firewall (WAF).
 
+### WAN-to-DMZ traffic
+  - set firewall ipv4 name WAN-to-DMZ rule 1 action accept
+  - set firewall ipv4 name WAN-to-DMZ rule 1 state established
 ### DMZ-to-WAN
 - We must add a temporary rule to the firewall in order to get internet access to our web server
-   - Set the rule number to 999 or something else (we will delete this rule after we are done.)
-   - Set the action to accept
-   - Set  source ip address to be the web server
+   - set firewall ipv4 name DMZ-to-WAN rule 999 action accept
+   - set firewall ipv4 name LAN-to-DMZ rule 999 source address 172.16.50.3
 
 ### Adding mod_security, the core rule set, and php to web01
   - sudo dnf install mod_security mod_security_crs php php-common php-opcache php-cli php-gd php-curl php-mysqlnd -y
   - now delete our previous firewall rule
-    - 
+      - delete firewall ipv4 name DMZ-to-WAN rule 999 action accept
+      - delete firewall ipv4 name LAN-to-DMZ rule 999 source address 172.16.50.3
 
 ### Testing ModSecurity
   - we will create a php webshell
