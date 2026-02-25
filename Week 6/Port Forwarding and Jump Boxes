@@ -1,0 +1,94 @@
+## This lab will cover setting up port forwarding and jump boxes
+
+### Remove static route from rw01
+- on our rw01
+  - sudo ip route del 172.16.50.0/29
+
+### Port Forwarding
+- Now we are going to add a NAT destination rule (a.k.a. port forwarding) so that any port 80 traffic coming to our firewall's WAN/eth0 interface will be forwarded on to web01. 
+  - The destination port refers to the port received by eth0 on fw1
+  - The inbound interface is eth0/WAN
+  - The address received is "translated" and forwarded to web01 port 80
+- To do this:
+  - set nat destination rule 10 description "HTTP->WEB01"
+  - set nat destination rule 10 destination port 80
+  - set nat destination rule 10 inbound-interface name eth0
+  - set nat destination rule 10 protocol tcp
+  - set nat destination rule 10 translation address 172.16.50.3
+  - set nat destination rule 10 translation port 80
+
+### The Jump Box
+- go to hardware in proxmox and change network adapter to our DMZ
+- Add a new user
+  - sudo adduser azrael
+- Add our new user to sudoers group
+  - sudo usermod -aG sudo azrael
+- Change hostname
+  - sudo hostnamectl set-hostname jump-azrael
+- Using the netplan yaml file configure
+  - addresses: 172.16.50.4/29
+  - nameservers: 172.16.50.2
+  - routes: - to: 0.0.0.0/0 via: 172.16.50.2
+- sudo netplan apply
+
+### Firewalls and SSH
+- make a rule so that our fw only listens on LAN for ssh connections
+  - set service ssh listen-address 172.16.150.2
+
+### Key Generation on rw01
+- On rw01 we will create a dedicated keypair that will only be used for ssh access to jump
+  - ssh-keygen -t rsa -b 4096 -f ~/.ssh/jump_key -C "SSH key for jump server access"
+### Passwordless User on jump
+- First we create new passwordless user
+  - sudo adduser jump-azrael-passless --disabled-password
+- Now set up SSH authorized keys for the user
+  - sudo mkdir -p /home/jump-azrael-passless/.ssh
+  - sudo chmod 700 /home/jump-azrael-passless/.ssh
+  - sudo chown jump-azrael-passless:jump-azrael-passless /home/jump-azrael-passless/.ssh
+- We need to add a temp rule to our firewall now to allow scp from rw to jump
+  - set firewall ipv4 name WAN-to-DMZ rule 999 action accept
+  - set firewall ipv4 name WAN-to-DMZ rule 999 protocol tcp
+  - set firewall ipv4 name WAN-to-DMZ rule 999 source address 10.0.17.20
+  - set firewall ipv4 name WAN-to-DMZ rule 999 destination address 172.16.50.4
+  - set firewall ipv4 name WAN-to-DMZ rule 999 destination port 22
+- delete this rule once done
+
+- Copy the public key from rw01 to jump
+- on rw01
+  - scp ~/.ssh/jump_key.pub azrael@172.16.50.4:/tmp/
+  - ssh azrael@172.16.50.4
+- on jump
+  - sudo mv /tmp/jump_key.pub /home/jump-azrael-passless/.ssh/authorized_keys
+  - sudo chmod 600 /home/jump-azrael-passless/.ssh/authorized_keys
+  - sudo chown jump-azrael-passless:jump-azrael-passless /home/jump-azrael-passless/.ssh/authorized_keys
+
+### Create NAT destination rule (port forwarding) on fw01
+- set nat destination rule 20 description "SSH->JUMP"
+- set nat destination rule 20 destination port 22
+- set nat destination rule 20 inbound-interface name eth0
+- set nat destination rule 20 protocol tcp
+- set nat destination rule 20 translation address 172.16.50.4
+- set nat destination rule 20 translation port 22
+- commit -> save
+
+### Adjust WAN-to-DMZ firewall to allow SSH from WAN to jump
+- set firewall ipv4 name WAN-to-DMZ rule 20 action accept
+- set firewall ipv4 name WAN-to-DMZ rule 20 protocol tcp
+- set firewall ipv4 name WAN-to-DMZ rule 20 destination address 172.16.50.4
+- set firewall ipv4 name WAN-to-DMZ rule 20 destination port 22
+- set firewall ipv4 name WAN-to-DMZ rule 20 description "Allow SSH from WAN to jump"
+- commit -> save
+
+### Create an account for the internal admin
+- sudo adduser azrael-adm
+- sudo usermod -aG sudo azrael-adm
+
+### Wazuh agent on Jump
+- download most recent agent package on mgmt01, then ->
+  - scp wazuh-agent_4.14.3-1_amd64.deb azrael-adm@172.16.50.4:/tmp/
+  - ssh azrael-adm@172.16.50.4
+  - cd /tmp
+  - sudo WAZUH_MANAGER='172.16.200.10' dpkg -i wazuh-agent_4.14.3-1_amd64.deb
+  - sudo systemctl start wazuh-agent
+  - sudo systemctl enable wazuh-agent
+  - sudo systemctl status wazuh-agent
