@@ -29,6 +29,8 @@ fi
 read -p "Enter the new hostname: " NEW_HOSTNAME
 hostname "$NEW_HOSTNAME"
 
+
+# can be used if internet can be reached from machine
 # network configuration using netplan
 # config file should be in /etc/netplan/50-cloud-init.yaml
 
