@@ -1,5 +1,6 @@
 !/bin/bash
 # This script will automate the setup of a linux vm 
+# note this script is work in progress and not complete/tested yet
 
 # Prompt for username
 read -p "Enter the new user's username: " USERNAME
