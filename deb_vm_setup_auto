@@ -1,0 +1,18 @@
+!/bin/bash
+# This script will automate the setup of a linux vm 
+
+# Prompt for username
+read -p "Enter the new user's username: " USERNAME
+
+# Prompt for password (silent)
+read -sp "Enter the password for the new user: " PASSWORD
+echo
+
+useradd -m -c "$FULL_NAME" "$USERNAME"
+
+# Change hostname
+read -p "Enter the new hostname: " NEW_HOSTNAME
+hostname "$NEW_HOSTNAME"
+
+# network configuration
+
