@@ -9,7 +9,7 @@ read -p "Enter the new user's username: " USERNAME
 read -sp "Enter the password for the new user: " PASSWORD
 echo
 
-useradd -m -c "$FULL_NAME" "$USERNAME"
+useradd -m -c "$USERNAME"
 
 # option for adding user to sudoers group
 read -p "Do you want to add $USERNAME to sudoers group? (y/n): " choice
