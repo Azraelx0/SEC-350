@@ -17,8 +17,6 @@ read -p "Do you want to add $USERNAME to sudoers group? (y/n): " choice
 # Check the user's input
 if [ "$choice" = "y" ]; then
     sudo usermod -aG $USERNAME
-if [ "$choice" = "y" ]; then
-    break
 else
     echo "Exiting."
     exit 0
@@ -36,7 +34,6 @@ hostname "$NEW_HOSTNAME"
 
 NIC=$(ip -o link show | awk -F': ' '{print $2}' | grep -v lo | head -n 1)
 read -p "Enter IP with cidr (e.g., 192.168.1.10/24): " IP
-read -p "Enter Gateway: " GW
 read -p "Enter DNS (e.g., 8.8.8.8): " DNS
 read -p "Add static route? (y/n): " ADD_ROUTE
 
@@ -59,9 +56,11 @@ network:
   ethernets:
     $NIC:
       addresses: [$IP]
-      gateway4: $GW
       nameservers:
         addresses: [$DNS]
+      routes:
+        - to:
+          via:
 EOF
 sudo netplan apply
 
