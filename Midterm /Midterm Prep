@@ -1,6 +1,7 @@
 # Midterm Prep
 ### Will include firewall configs, practice web server setup, and passwordless setup
 
+### fw01 config
 set firewall ipv4 name DMZ-to-LAN default-action 'drop'
 set firewall ipv4 name DMZ-to-LAN default-log
 set firewall ipv4 name DMZ-to-LAN rule 1 action 'accept'
@@ -102,19 +103,49 @@ set service dns forwarding allow-from '172.16.150.0/24'
 set service dns forwarding listen-address '172.16.50.2'
 set service dns forwarding listen-address '172.16.150.2'
 set service dns forwarding system
-set service ntp allow-client address '127.0.0.0/8'
-set service ntp allow-client address '169.254.0.0/16'
-set service ntp allow-client address '10.0.0.0/8'
-set service ntp allow-client address '172.16.0.0/12'
-set service ntp allow-client address '192.168.0.0/16'
-set service ntp allow-client address '::1/128'
-set service ntp allow-client address 'fe80::/10'
-set service ntp allow-client address 'fc00::/7'
-set service ntp server time1.vyos.net
-set service ntp server time2.vyos.net
-set service ntp server time3.vyos.net
 set service ssh listen-address '172.16.150.2'
 set service ssh port '22'
-set system config-management commit-revisions '100'
-set system console device ttyS0 speed '115200'
 set system host-name 'fw01-azrael'
+
+### Nginx web server on jump
+- First temp rule to allow internet access
+  - set firewall ipv4 name DMZ-to-WAN rule 999 action accept
+  - set firewall ipv4 name DMZ-to-WAN rule 999 source address 172.16.50.4
+  - set firewall ipv4 name DMZ-to-WAN rule 999 description "TEMP - Allow jump to download packages"
+  - commit -> save
+  - delete when done
+- now sudo apt install nginx
+- change default index.html file
+- now allow port 80 from mgmt01 to jump
+set firewall ipv4 name LAN-to-DMZ rule 15 action accept
+set firewall ipv4 name LAN-to-DMZ rule 15 protocol tcp
+set firewall ipv4 name LAN-to-DMZ rule 15 destination address 172.16.50.4
+set firewall ipv4 name LAN-to-DMZ rule 15 destination port 80
+commit
+save
+
+### Passwordless login
+- On win machine
+  - ssh-keygen -t rsa -b 4096
+- verify key
+  - type C:\Users\azrael\.ssh\id_rsa.pub
+- may need to add temp rule on fw between dmz and lan 
+set firewall ipv4 name LAN-to-DMZ rule 999 action accept
+set firewall ipv4 name LAN-to-DMZ rule 999 protocol tcp
+set firewall ipv4 name LAN-to-DMZ rule 999 source address 172.16.150.50
+set firewall ipv4 name LAN-to-DMZ rule 999 destination address 172.16.50.4
+set firewall ipv4 name LAN-to-DMZ rule 999 destination port 22
+set firewall ipv4 name LAN-to-DMZ rule 999 description "TEMP - SSH from wks01 to jump"
+commit
+save
+(delete when done)
+- Now copy to linux machine
+  - scp C:\Users\azrael\.ssh\id_rsa.pub azrael-adm@172.16.50.4:~/ 
+- to add key to authorized keys on jump user (cat doesn't work for some reason)
+  - sudo tee -a /home/jump-azrael-passless/.ssh/authorized_keys < ~/id_rsa.pub
+- may need to change permissions
+  - sudo chmod 600 /home/jump-azrael-passless/.ssh/authorized_keys
+  - sudo chown jump-azrael-passless:jump-azrael-passless /home/jump-azrael-passless/.ssh/authorized_keys
+- now test connection
+  - from wks ssh jump-azrael-passless@172.16.50.4
+  - it should ask for key passphrase
