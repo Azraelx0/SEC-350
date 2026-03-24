@@ -1,5 +1,3 @@
-### edge01 firewall config
-
 set firewall ipv4 name DMZ-to-LAN default-action 'drop'
 set firewall ipv4 name DMZ-to-LAN default-log
 set firewall ipv4 name DMZ-to-LAN rule 1 action 'accept'
