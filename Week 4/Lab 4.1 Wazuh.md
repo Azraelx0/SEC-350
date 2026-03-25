@@ -23,6 +23,4 @@
     - sudo systemctl daemon-reload
     - sudo systemctl enable wazuh-agent
     - sudo systemctl start wazuh-agent
-- wazuh agent files can be found in 
-
 
