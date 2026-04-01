@@ -1,1 +1,34 @@
+### On MGMT02
+Enable RDP on mgmt02
+Go to Settings -> System -> Remote Desktop -> Enable Remote Desktop
 
+Create the DMZ->LAN and LAN->MGMT rules necessary for RDP to connect to mgmt02
+On edge01:
+  set firewall ipv4 name DMZ-to-LAN rule 20 action accept
+  set firewall ipv4 name DMZ-to-LAN rule 20 description 'Allow RDP to mgmt02'
+  set firewall ipv4 name DMZ-to-LAN rule 20 destination address '172.16.200.11'
+  set firewall ipv4 name DMZ-to-LAN rule 20 destination port '3389'
+  set firewall ipv4 name DMZ-to-LAN rule 20 protocol 'tcp'
+  commit
+  save
+
+On fw-mgmt:
+  set firewall ipv4 name LAN-to-MGMT rule 40 action accept
+  set firewall ipv4 name LAN-to-MGMT rule 40 description 'Allow RDP to mgmt02'
+  set firewall ipv4 name LAN-to-MGMT rule 40 protocol tcp
+  set firewall ipv4 name LAN-to-MGMT rule 40 source address '172.16.50.4'
+  set firewall ipv4 name LAN-to-MGMT rule 40 destination address '172.16.200.11'
+  set firewall ipv4 name LAN-to-MGMT rule 40 destination port '3389'
+  commit
+  save
+
+Invoke an SSH connection from traveler to jump so that RDP connections in that tunnel are redirected to mgmt02.
+
+ssh -i $env:USERPROFILE\.ssh\id_rsa -p 2222 -L 3389:172.16.200.11:3389 jump-azrael-passless@10.0.17.120
+
+This creates a tunnel where:
+- Local port 3389 on Traveler gets forwarded through jump to mgmt02 at 172.16.200.11:3389
+
+RDP through the tunnel
+On Traveler open Remote Desktop Connection and connect to:
+127.0.0.1
