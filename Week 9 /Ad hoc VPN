@@ -24,11 +24,11 @@ On fw-mgmt:
 
 Invoke an SSH connection from traveler to jump so that RDP connections in that tunnel are redirected to mgmt02.
 
-ssh -i $env:USERPROFILE\.ssh\id_rsa -p 2222 -L 3389:172.16.200.11:3389 jump-azrael-passless@10.0.17.120
+ssh -i $env:USERPROFILE\.ssh\id_rsa -p 2222 -L 13389:172.16.200.11:3389 jump-azrael-passless@10.0.17.120
 
 This creates a tunnel where:
 - Local port 3389 on Traveler gets forwarded through jump to mgmt02 at 172.16.200.11:3389
 
 RDP through the tunnel
 On Traveler open Remote Desktop Connection and connect to:
-127.0.0.1
+127.0.0.1:13389
