@@ -62,3 +62,14 @@ Point wks01 dns to mgmt
   - Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses "172.16.200.11"
 Join the domain
   - Add-Computer -DomainName "azrael.local" -Credential (Get-Credential) -Restart
+
+### Install Wazuh agents on wks01 and mgmt02
+wks01
+- Just go to wazuh dashboard, add agent, run the given command in PowerShell on wks01
+- NET START WazuhSvc to start agent
+
+mgmt02
+- due to not having internet this one is more work
+- using the vpn we created last lab we download the wazuh msi installer onto our traveler machine
+  - Invoke-WebRequest -Uri "https://packages.wazuh.com/4.x/windows/wazuh-agent-4.3.11-1.msi" -OutFile "C:\Users\azrael\Downloads\wazuh-agent.msi"
+- next start the tunnel, rdp to mgmt02, and move the installer onto our mgmt02 machine
