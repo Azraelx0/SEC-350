@@ -56,3 +56,9 @@ Create Port groups on fw-mgmt
   set firewall ipv4 name LAN-to-MGMT rule 70 destination port '3389'
   commit
   save
+
+### Add wks01 to domain
+Point wks01 dns to mgmt
+  - Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses "172.16.200.11"
+Join the domain
+  - Add-Computer -DomainName "azrael.local" -Credential (Get-Credential) -Restart
