@@ -1,3 +1,58 @@
-#### In this lab we're going to install a wazuh agent on our LAN and MGMT windows system.
+### In this lab we're going to install a wazuh agent on our LAN and MGMT windows system.
 
-Install 
+### Install AD on mgmt02
+Since we have no internet we install from the local windows files
+  - Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
+
+Make it domain controller
+Install-ADDSForest `
+  -DomainName "azrael.local" `
+  -DomainNetbiosName "AZRAEL" `
+  -InstallDns:$true `
+  -Force:$true
+
+Add Domain admin account
+
+### Add necessary port groups on firewall
+Create Port groups on fw-mgmt
+  set firewall group port-group AD-TCP port '53'
+  set firewall group port-group AD-TCP port '88'
+  set firewall group port-group AD-TCP port '135'
+  set firewall group port-group AD-TCP port '139'
+  set firewall group port-group AD-TCP port '389'
+  set firewall group port-group AD-TCP port '445'
+  set firewall group port-group AD-TCP port '464'
+  set firewall group port-group AD-TCP port '636'
+  set firewall group port-group AD-TCP port '3268'
+  set firewall group port-group AD-TCP port '3269'
+  set firewall group port-group AD-TCP port '49152-65535'
+  
+  set firewall group port-group AD-UDP port '53'
+  set firewall group port-group AD-UDP port '88'
+  set firewall group port-group AD-UDP port '123'
+  set firewall group port-group AD-UDP port '137'
+  set firewall group port-group AD-UDP port '389'
+  commit
+  save
+
+### Create the rules
+  set firewall ipv4 name LAN-to-MGMT rule 50 action accept
+  set firewall ipv4 name LAN-to-MGMT rule 50 description 'Allow AD TCP ports from LAN to mgmt02'
+  set firewall ipv4 name LAN-to-MGMT rule 50 protocol tcp
+  set firewall ipv4 name LAN-to-MGMT rule 50 destination address '172.16.200.11'
+  set firewall ipv4 name LAN-to-MGMT rule 50 destination group port-group 'AD-TCP'
+  
+  set firewall ipv4 name LAN-to-MGMT rule 60 action accept
+  set firewall ipv4 name LAN-to-MGMT rule 60 description 'Allow AD UDP ports from LAN to mgmt02'
+  set firewall ipv4 name LAN-to-MGMT rule 60 protocol udp
+  set firewall ipv4 name LAN-to-MGMT rule 60 destination address '172.16.200.11'
+  set firewall ipv4 name LAN-to-MGMT rule 60 destination group port-group 'AD-UDP'
+  
+  set firewall ipv4 name LAN-to-MGMT rule 70 action accept
+  set firewall ipv4 name LAN-to-MGMT rule 70 description 'Allow RDP from LAN to mgmt02'
+  set firewall ipv4 name LAN-to-MGMT rule 70 protocol tcp
+  set firewall ipv4 name LAN-to-MGMT rule 70 source address '172.16.150.0/24'
+  set firewall ipv4 name LAN-to-MGMT rule 70 destination address '172.16.200.11'
+  set firewall ipv4 name LAN-to-MGMT rule 70 destination port '3389'
+  commit
+  save
