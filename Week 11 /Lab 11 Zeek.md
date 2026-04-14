@@ -2,6 +2,7 @@
 will add writeup later
 
 # edge01 config
+
 set firewall ipv4 name DMZ-to-LAN rule 10 destination address '172.16.200.10'
 set firewall ipv4 name DMZ-to-LAN rule 10 destination port '1514-1515'
 set firewall ipv4 name DMZ-to-LAN rule 20 destination address '172.16.200.11'
