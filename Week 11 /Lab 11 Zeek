@@ -1,5 +1,9 @@
 # Zeek
-will add writeup later
+Reflection
+Overall this lab was fairly straight forward. As long as I remember to start the machines that my others need to function *cough* dhcp *cough* jump.
+Other than that everything went well it was only like a couple of new firewall rules.
+
+will add technical writeup later
 
 # edge01 config
 set firewall ipv4 name DMZ-to-LAN rule 10 destination address '172.16.200.10'
